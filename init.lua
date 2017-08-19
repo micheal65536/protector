@@ -93,14 +93,14 @@ end
 
 
 -- protector interface
-protector.generate_formspec = function(meta)
+protector.generate_formspec = function(meta, player_name)
 
 	local formspec = "size[8,7]"
 		.. default.gui_bg
 		.. default.gui_bg_img
 		.. default.gui_slots
 		.. "label[2.5,0;" .. S("-- Protector interface --") .. "]"
-		.. "label[0,1;" .. S("PUNCH node to show protected area or USE for area check") .. "]"
+		.. "label[0,1;" .. S("Punch node to show protected area or use for area check") .. "]"
 		.. "label[0,2;" .. S("Members:") .. "]"
 		.. "button_exit[2.5,6.2;3,0.5;close_me;" .. S("Close") .. "]"
 
@@ -109,25 +109,29 @@ protector.generate_formspec = function(meta)
 	local i = 0
 
 	for n = 1, #members do
-
 		if i < npp then
+			if members[n] ~= player_name then	-- don't allow players to remove themselves
+				-- show username
+				formspec = formspec .. "button[" .. (i % 4 * 2)
+				.. "," .. math.floor(i / 4 + 3)
+				.. ";1.5,.5;protector_member;" .. members[n] .. "]"
 
-			-- show username
-			formspec = formspec .. "button[" .. (i % 4 * 2)
-			.. "," .. math.floor(i / 4 + 3)
-			.. ";1.5,.5;protector_member;" .. members[n] .. "]"
-
-			-- username remove button
-			.. "button[" .. (i % 4 * 2 + 1.25) .. ","
-			.. math.floor(i / 4 + 3)
-			.. ";.75,.5;protector_del_member_" .. members[n] .. ";X]"
+				-- username remove button
+				.. "button[" .. (i % 4 * 2 + 1.25) .. ","
+				.. math.floor(i / 4 + 3)
+				.. ";.75,.5;protector_del_member_" .. members[n] .. ";X]"
+			else
+				-- show username without remove button
+				formspec = formspec .. "button[" .. (i % 4 * 2)
+				.. "," .. math.floor(i / 4 + 3)
+				.. ";2,.5;protector_member;" .. members[n] .. "]"
+			end
 		end
 
 		i = i + 1
 	end
 	
 	if i < npp then
-
 		-- user name entry field
 		formspec = formspec .. "field[" .. (i % 4 * 2 + 1 / 3) .. ","
 		.. (math.floor(i / 4 + 3) + 1 / 3)
@@ -136,7 +140,11 @@ protector.generate_formspec = function(meta)
 		-- username add button
 		.."button[" .. (i % 4 * 2 + 1.25) .. ","
 		.. math.floor(i / 4 + 3) .. ";.75,.5;protector_submit;+]"
+	end
 
+	if player_name == meta:get_string("owner") then
+		-- allow other players to change members checkbox
+		formspec = formspec .. "checkbox[0,5;protector_members_can_change;" .. S("Other members can change configuration") .. ";" .. tostring(meta:get_int("members_can_change") == 1) .. "]"
 	end
 
 	return formspec
@@ -375,12 +383,12 @@ minetest.register_node("protector:protect", {
 	on_place = protector.check_overlap,
 
 	after_place_node = function(pos, placer)
-
 		local meta = minetest.get_meta(pos)
 
 		meta:set_string("owner", placer:get_player_name() or "")
 		meta:set_string("infotext", S("Protection (owned by @1)", meta:get_string("owner")))
 		meta:set_string("members", "")
+		meta:set_int("members_can_change", 0)
 	end,
 
 	on_use = function(itemstack, user, pointed_thing)
@@ -393,13 +401,11 @@ minetest.register_node("protector:protect", {
 	end,
 
 	on_rightclick = function(pos, node, clicker, itemstack)
-
 		local meta = minetest.get_meta(pos)
 
-		if meta
-		and protector.can_dig(1, pos,clicker:get_player_name(), true, 1) then
+		if meta and (clicker:get_player_name() == meta:get_string("owner") or (meta:get_int("members_can_change") == 1 and protector.is_member(meta, clicker:get_player_name()))) then
 			minetest.show_formspec(clicker:get_player_name(), 
-			"protector:node_" .. minetest.pos_to_string(pos), protector.generate_formspec(meta))
+			"protector:node_" .. minetest.pos_to_string(pos), protector.generate_formspec(meta, clicker:get_player_name()))
 		end
 	end,
 
@@ -456,12 +462,12 @@ minetest.register_node("protector:protect2", {
 	on_place = protector.check_overlap,
 
 	after_place_node = function(pos, placer)
-
 		local meta = minetest.get_meta(pos)
 
 		meta:set_string("owner", placer:get_player_name() or "")
 		meta:set_string("infotext", S("Protection (owned by @1)", meta:get_string("owner")))
 		meta:set_string("members", "")
+		meta:set_int("members_can_change", 0)
 	end,
 
 	on_use = function(itemstack, user, pointed_thing)
@@ -474,13 +480,11 @@ minetest.register_node("protector:protect2", {
 	end,
 
 	on_rightclick = function(pos, node, clicker, itemstack)
-
 		local meta = minetest.get_meta(pos)
 
-		if protector.can_dig(1, pos, clicker:get_player_name(), true, 1) then
-
+		if meta and (clicker:get_player_name() == meta:get_string("owner") or (meta:get_int("members_can_change") == 1 and protector.is_member(meta, clicker:get_player_name()))) then
 			minetest.show_formspec(clicker:get_player_name(), 
-			"protector:node_" .. minetest.pos_to_string(pos), protector.generate_formspec(meta))
+			"protector:node_" .. minetest.pos_to_string(pos), protector.generate_formspec(meta, clicker:get_player_name()))
 		end
 	end,
 
@@ -513,22 +517,22 @@ minetest.register_craft({
 
 -- check formspec buttons or when name entered
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-
 	-- protector formspec found
 	if string.sub(formname, 0, string.len("protector:node_")) == "protector:node_" then
+		local meta = minetest.get_meta(minetest.string_to_pos(string.sub(formname, string.len("protector:node_") + 1)))
 
-		local pos_s = string.sub(formname, string.len("protector:node_") + 1)
-		local pos = minetest.string_to_pos(pos_s)
-		local meta = minetest.get_meta(pos)
+		-- prevent non-members from modifying the protector
+		if player:get_player_name() ~= meta:get_string("owner") and not protector.is_member(meta, player:get_player_name()) then
+			return
+		end
 
-		-- only owner can add names
-		if not protector.can_dig(1, pos, player:get_player_name(), true, 1) then
+		-- only the owner is allowed to modify the protector, unless the protector is configured to allow other members to change it
+		if not (meta:get_int("members_can_change") == 1) and player:get_player_name() ~= meta:get_string("owner") then
 			return
 		end
 
 		-- add member [+]
 		if fields.protector_add_member then
-
 			for _, i in pairs(fields.protector_add_member:split(" ")) do
 				protector.add_member(meta, i)
 			end
@@ -536,18 +540,26 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
 		-- remove member [x]
 		for field, value in pairs(fields) do
+			if string.sub(field, 0, string.len("protector_del_member_")) == "protector_del_member_" then
+				local member = string.sub(field,string.len("protector_del_member_") + 1)
+				if member ~= player:get_player_name() then
+					protector.del_member(meta, member)
+				end
+			end
+		end
 
-			if string.sub(field, 0,
-				string.len("protector_del_member_")) == "protector_del_member_" then
-
-				protector.del_member(meta,
-					string.sub(field,string.len("protector_del_member_") + 1))
+		-- allow other players to change configuration
+		if fields.protector_members_can_change and player:get_player_name() == meta:get_string("owner") then	-- only the owner is allowed to change this setting
+			if fields.protector_members_can_change == "true" then
+				meta:set_int("members_can_change", 1)
+			else
+				meta:set_int("members_can_change", 0)
 			end
 		end
 
 		-- reset formspec until close button pressed
 		if not fields.close_me then
-			minetest.show_formspec(player:get_player_name(), formname, protector.generate_formspec(meta))
+			minetest.show_formspec(player:get_player_name(), formname, protector.generate_formspec(meta, player:get_player_name()))
 		end
 	end
 end)
