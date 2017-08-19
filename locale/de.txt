@@ -3,11 +3,6 @@
 # last update: 2016/June/5
 # Author: Xanthin
 
-#admin.lua
-Remove Protectors near players with names provided (separate names with spaces) = Entferne Stoerschuetzer von bestimmten Namen in der Naehe von Spielern (trenne Namen durch Leerzeichen)
-Protector Names to remove: @1 = Stoerschutznamen zum Entfernen: @1
-Name List Reset = Namensliste zurueckgesetzt
-
 #doors_chest.lua
 Protected Wooden Door = Geschützte Holztür
 Protected Steel Door = Geschützte Stahltür

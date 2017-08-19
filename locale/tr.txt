@@ -1,11 +1,6 @@
 # Turkish translation by mahmutelmas06
 # last update: 2016/June/5
 
-#admin.lua
-Remove Protectors near players with names provided (separate names with spaces) = Ismi verilen oyuncuların yanındaki korumaları kaldır. ( İsimleri boşlukla ayır)
-Protector Names to remove: @1 = Silinecek korumaların isimleri: @1
-Name List Reset = İsim listesini sıfırla
-
 #doors_chest.lua
 Protected Wooden Door = Korumalı ahşap kapı
 Protected Steel Door = Korumalı çelik kapı

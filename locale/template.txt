@@ -1,11 +1,6 @@
 # Template for translations of protector mod
 # last update: 2016/June/5
 
-#admin.lua
-Remove Protectors near players with names provided (separate names with spaces) = 
-Protector Names to remove: @1 = 
-Name List Reset = 
-
 #doors_chest.lua
 Protected Wooden Door = 
 Protected Steel Door = 

@@ -54,36 +54,7 @@ Change log:
 Lucky Blocks: 10
 
 
-Usage: (requires server privelage)
-
-list names to remove
-
-	/protector_remove
-
-remove specific user names
-
-	/protector_remove name1 name2
-
-remove all names from list
-
-	/protector_remove -
-
-Whenever a player is near any protectors with name1 or name2 then it will be
-replaced by an air block.
-
-
-show owner name to replace
-
-	/protector_replace
-
-replace owner with new name
-
-	/protector_replace owner new_owner
-
-reset name list
-
-	/protector_replace -
-
+Usage:
 
 show protected areas of your nearby protectors (max of 5)
 	/protector_show
