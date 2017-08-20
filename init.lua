@@ -1,8 +1,3 @@
-
--- 'delprotect' priv removed, use 'protection_bypass' instead
---minetest.register_privilege("delprotect","Ignore player protection")
-
-
 -- get minetest.conf settings
 protector = {}
 protector.mod = "redo"
@@ -171,115 +166,42 @@ local function inside_spawn(pos, radius)
 	return false
 end
 
-
--- Infolevel:
--- 0 for no info
--- 1 for "This area is owned by <owner> !" if you can't dig
--- 2 for "This area is owned by <owner>.
--- 3 for checking protector overlaps
-
-protector.can_dig = function(r, pos, digger, onlyowner, infolevel)
-
-	if not digger or not pos then
-		return false
-	end
+local real_is_protected = minetest.is_protected
+-- check for protected area, return true if protected and player isn't on list
+function minetest.is_protected(pos, playername)
+	playername = playername or "" -- nil check
 
 	-- protector_bypass privileged users can override protection
-	if infolevel == 1
-	and minetest.check_player_privs(digger, {protection_bypass = true}) then
-		return true
+	if minetest.check_player_privs(playername, {protection_bypass = true}) then
+		return real_is_protected(pos, playername)
 	end
 
-	-- infolevel 3 is only used to bypass priv check, change to 1 now
-	if infolevel == 3 then infolevel = 1 end
+	local protected = false
 
 	-- is spawn area protected ?
 	if inside_spawn(pos, protector.spawn) then
-
-		minetest.chat_send_player(digger,
-			S("Spawn @1 has been protected up to a @2 block radius.",
-			minetest.pos_to_string(statspawn), protector.spawn))
-
-		return false
+		minetest.chat_send_player(playername, S("Spawn @1 has been protected up to a @2 block radius.", minetest.pos_to_string(statspawn), protector.spawn))
+		protected = true
 	end
 
 	-- find the protector nodes
-	local pos = minetest.find_nodes_in_area(
-		{x = pos.x - r, y = pos.y - r, z = pos.z - r},
-		{x = pos.x + r, y = pos.y + r, z = pos.z + r},
+	local nodes = minetest.find_nodes_in_area(
+		{x = pos.x - protector.radius, y = pos.y - protector.radius, z = pos.z - protector.radius},
+		{x = pos.x + protector.radius, y = pos.y + protector.radius, z = pos.z + protector.radius},
 		{"protector:protect", "protector:protect2"})
-
-	local meta, owner, members
-
-	for n = 1, #pos do
-
-		meta = minetest.get_meta(pos[n])
-		owner = meta:get_string("owner") or ""
-		members = meta:get_string("members") or ""
-
-		-- node change and digger isn't owner
-		if infolevel == 1 and owner ~= digger then
-
-			-- and you aren't on the member list
-			if onlyowner or not protector.is_member(meta, digger) then
-
-				minetest.chat_send_player(digger,
-					S("This area is owned by @1!", owner))
-
-					return false
-			end
+	for _, protector_pos in ipairs(nodes) do
+		local meta = minetest.get_meta(protector_pos)
+		if playername ~= meta:get_string("owner") and not protector.is_member(meta, playername) then
+			minetest.chat_send_player(playername, S("This area is owned by @1.", meta:get_string("owner")))
+			protected = true
+			break
 		end
-
-		-- when using protector as tool, show protector information
-		if infolevel == 2 then
-
-			minetest.chat_send_player(digger,
-			S("This area is owned by @1.", owner))
-
-			minetest.chat_send_player(digger,
-			S("Protection located at: @1", minetest.pos_to_string(pos[n])))
-
-			if members ~= "" then
-
-				minetest.chat_send_player(digger,
-				S("Members: @1.", members))
-			end
-
-			return false
-		end
-
 	end
 
-	-- show when you can build on unprotected area
-	if infolevel == 2 then
-
-		if #pos < 1 then
-
-			minetest.chat_send_player(digger,
-			S("This area is not protected."))
-		end
-
-		minetest.chat_send_player(digger, S("You can build here."))
-	end
-
-	return true
-end
-
-
-protector.old_is_protected = minetest.is_protected
-
--- check for protected area, return true if protected and digger isn't on list
-function minetest.is_protected(pos, digger)
-
-	digger = digger or "" -- nil check
-
-	-- is area protected against digger?
-	if not protector.can_dig(protector.radius, pos, digger, false, 1) then
-
-		local player = minetest.get_player_by_name(digger)
-
+	-- is area protected against player?
+	if protected == true then
+		local player = minetest.get_player_by_name(playername)
 		if player and player:is_player() then
-
 			-- hurt player if protection violated
 			if protector.hurt > 0 and player:get_hp() > 0 then
 				player:set_hp(player:get_hp() - protector.hurt)
@@ -288,25 +210,18 @@ function minetest.is_protected(pos, digger)
 			-- flip player when protection violated
 			if protector.flip then
 				-- yaw + 180°
-				--local yaw = player:get_look_horizontal() + math.pi
 				local yaw = player:get_look_yaw() + math.pi
-
 				if yaw > 2 * math.pi then
 					yaw = yaw - 2 * math.pi
 				end
-
-				--player:set_look_horizontal(yaw)
 				player:set_look_yaw(yaw)
 
 				-- invert pitch
-				--player:set_look_vertical(-player:get_look_vertical())
 				player:set_look_pitch(-player:get_look_pitch())
 
 				-- if digging below player, move up to avoid falling through hole
 				local pla_pos = player:getpos()
-
 				if pos.y < pla_pos.y then
-
 					player:setpos({
 						x = pla_pos.x,
 						y = pla_pos.y + 0.8,
@@ -320,41 +235,38 @@ function minetest.is_protected(pos, digger)
 	end
 
 	-- otherwise can dig or place
-	return protector.old_is_protected(pos, digger)
+	return real_is_protected(pos, playername)
 end
 
 
 -- make sure protection block doesn't overlap another protector's area
-function protector.check_overlap(itemstack, placer, pointed_thing)
-
-	if pointed_thing.type ~= "node" then
-		return itemstack
-	end
-
-	local pos = pointed_thing.above
-
+function protector.check_overlap(pos, player)
 	-- make sure protector doesn't overlap onto protected spawn area
 	if inside_spawn(pos, protector.spawn + protector.radius) then
-
-		minetest.chat_send_player(placer:get_player_name(),
-			S("Spawn @1 has been protected up to a @2 block radius.",
-			minetest.pos_to_string(statspawn), protector.spawn))
-
-		return itemstack
+		minetest.chat_send_player(player:get_player_name(), S("Spawn @1 has been protected up to a @2 block radius.", minetest.pos_to_string(statspawn), protector.spawn))
+		return true
 	end
 
 	-- make sure protector doesn't overlap any other player's area
-	if not protector.can_dig(protector.radius * 2, pos,
-		placer:get_player_name(), true, 3) then
-
-		minetest.chat_send_player(placer:get_player_name(),
-			S("Overlaps into above players protected area"))
-
-		return itemstack
+	local nodes = minetest.find_nodes_in_area(
+		{x = pos.x - protector.radius * 2, y = pos.y - protector.radius * 2, z = pos.z - protector.radius * 2},
+		{x = pos.x + protector.radius * 2, y = pos.y + protector.radius * 2, z = pos.z + protector.radius * 2},
+		{"protector:protect", "protector:protect2"})
+	local overlaps = false
+	local owner = ""
+	for _, protector_pos in ipairs(nodes) do
+		local meta = minetest.get_meta(protector_pos)
+		if player:get_player_name() ~= meta:get_string("owner") then
+			overlaps = true
+			owner = meta:get_string("owner")
+		end
+	end
+	if overlaps == true then
+		minetest.chat_send_player(player:get_player_name(), S("Overlaps into @1's protected area.", owner))
+		return true
 	end
 
-	return minetest.item_place(itemstack, placer, pointed_thing)
-
+	return false
 end
 
 
@@ -380,7 +292,16 @@ minetest.register_node("protector:protect", {
 		}
 	},
 
-	on_place = protector.check_overlap,
+	on_place = function(itemstack, placer, pointed_thing)
+		if pointed_thing.type ~= "node" then
+			return itemstack
+		end
+		if protector.check_overlap(pointed_thing.above, placer) then
+			return itemstack
+		else
+			return minetest.item_place(itemstack, placer, pointed_thing)
+		end
+	end,
 
 	after_place_node = function(pos, placer)
 		local meta = minetest.get_meta(pos)
@@ -392,12 +313,38 @@ minetest.register_node("protector:protect", {
 	end,
 
 	on_use = function(itemstack, user, pointed_thing)
-
 		if pointed_thing.type ~= "node" then
 			return
 		end
 
-		protector.can_dig(protector.radius, pointed_thing.under, user:get_player_name(), false, 2)
+		local pos = pointed_thing.under
+		local nodes = minetest.find_nodes_in_area(
+			{x = pos.x - protector.radius, y = pos.y - protector.radius, z = pos.z - protector.radius},
+			{x = pos.x + protector.radius, y = pos.y + protector.radius, z = pos.z + protector.radius},
+			{"protector:protect", "protector:protect2"})
+
+		if #nodes > 0 then
+			local can_build = true
+
+			minetest.chat_send_player(user:get_player_name(), S("This area is owned by @1.", minetest.get_meta(nodes[1]):get_string("owner")))
+			for _, protector_pos in ipairs(nodes) do
+				local meta = minetest.get_meta(protector_pos)
+				minetest.chat_send_player(user:get_player_name(), S("Protection located at: @1", minetest.pos_to_string(protector_pos)))
+
+				if user:get_player_name() ~= meta:get_string("owner") and not protector.is_member(meta, user:get_player_name()) then
+					can_build = false
+				end
+			end
+
+			if can_build == true then
+				minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+			else
+				minetest.chat_send_player(user:get_player_name(), S("You cannot build here."))
+			end
+		else
+			minetest.chat_send_player(user:get_player_name(), S("This area is not protected."))
+			minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+		end
 	end,
 
 	on_rightclick = function(pos, node, clicker, itemstack)
@@ -410,17 +357,15 @@ minetest.register_node("protector:protect", {
 	end,
 
 	on_punch = function(pos, node, puncher)
-
-		if minetest.is_protected(pos, puncher:get_player_name()) then
-			return
+		local meta = minetest.get_meta(pos)
+		if puncher:get_player_name() == meta:get_string("owner") or protector.is_member(meta, puncher:get_player_name()) then
+			minetest.add_entity(pos, "protector:display")
 		end
-
-		minetest.add_entity(pos, "protector:display")
 	end,
 
 	can_dig = function(pos, player)
-
-		return player and protector.can_dig(1, pos, player:get_player_name(), true, 1)
+		local meta = minetest.get_meta(pos)
+		return player and meta and (player:get_player_name() == meta:get_string("owner") or minetest.check_player_privs(player:get_player_name(), {protection_bypass = true}))
 	end,
 
 	on_blast = function() end,
@@ -459,7 +404,16 @@ minetest.register_node("protector:protect2", {
 	},
 	selection_box = {type = "wallmounted"},
 
-	on_place = protector.check_overlap,
+	on_place = function(itemstack, placer, pointed_thing)
+		if pointed_thing.type ~= "node" then
+			return itemstack
+		end
+		if protector.check_overlap(pointed_thing.above, placer) then
+			return itemstack
+		else
+			return minetest.item_place(itemstack, placer, pointed_thing)
+		end
+	end,
 
 	after_place_node = function(pos, placer)
 		local meta = minetest.get_meta(pos)
@@ -471,12 +425,38 @@ minetest.register_node("protector:protect2", {
 	end,
 
 	on_use = function(itemstack, user, pointed_thing)
-
 		if pointed_thing.type ~= "node" then
 			return
 		end
 
-		protector.can_dig(protector.radius, pointed_thing.under, user:get_player_name(), false, 2)
+		local pos = pointed_thing.under
+		local nodes = minetest.find_nodes_in_area(
+			{x = pos.x - protector.radius, y = pos.y - protector.radius, z = pos.z - protector.radius},
+			{x = pos.x + protector.radius, y = pos.y + protector.radius, z = pos.z + protector.radius},
+			{"protector:protect", "protector:protect2"})
+
+		if #nodes > 0 then
+			local can_build = true
+
+			minetest.chat_send_player(user:get_player_name(), S("This area is owned by @1.", minetest.get_meta(nodes[1]):get_string("owner")))
+			for _, protector_pos in ipairs(nodes) do
+				local meta = minetest.get_meta(protector_pos)
+				minetest.chat_send_player(user:get_player_name(), S("Protection located at: @1", minetest.pos_to_string(protector_pos)))
+
+				if user:get_player_name() ~= meta:get_string("owner") and not protector.is_member(meta, user:get_player_name()) then
+					can_build = false
+				end
+			end
+
+			if can_build == true then
+				minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+			else
+				minetest.chat_send_player(user:get_player_name(), S("You cannot build here."))
+			end
+		else
+			minetest.chat_send_player(user:get_player_name(), S("This area is not protected."))
+			minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+		end
 	end,
 
 	on_rightclick = function(pos, node, clicker, itemstack)
@@ -489,17 +469,15 @@ minetest.register_node("protector:protect2", {
 	end,
 
 	on_punch = function(pos, node, puncher)
-
-		if minetest.is_protected(pos, puncher:get_player_name()) then
-			return
+		local meta = minetest.get_meta(pos)
+		if puncher:get_player_name() == meta:get_string("owner") or protector.is_member(meta, puncher:get_player_name()) then
+			minetest.add_entity(pos, "protector:display")
 		end
-
-		minetest.add_entity(pos, "protector:display")
 	end,
 
 	can_dig = function(pos, player)
-
-		return player and protector.can_dig(1, pos, player:get_player_name(), true, 1)
+		local meta = minetest.get_meta(pos)
+		return player and meta and (player:get_player_name() == meta:get_string("owner") or minetest.check_player_privs(player:get_player_name(), {protection_bypass = true}))
 	end,
 
 	on_blast = function() end,

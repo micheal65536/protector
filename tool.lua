@@ -51,12 +51,7 @@ minetest.register_craftitem("protector:tool", {
 		pos.z = pos.z + vec.z
 
 		-- does placing a protector overlap existing area
-		if not protector.can_dig(protector.radius * 2, pos,
-			user:get_player_name(), true, 3) then
-
-			minetest.chat_send_player(name,
-				"Overlaps into above players protected area")
-
+		if protector.check_overlap(pos, user) then
 			return
 		end
 

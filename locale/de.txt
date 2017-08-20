@@ -17,17 +17,17 @@ Protected Chest (@1) = Geschützte Truhe (@1)
 
 #init.lua
 -- Protector interface -- = -- Störschutz-Interface --
-Punch node to show protected area or use for area check = SCHLAGE Node, um geschützten Bereich anzuzeigen oder\nBENUTZE für Bereichsprüfung
+Punch node to show protected area or use for area check = Schlage Node, um geschützten Bereich anzuzeigen oder\nbenutze für Bereichsprüfung
 Members: = Mitglieder:
 Close = Schließen
 Other members can change configuration = Andere mitglieder können die konfiguration ändern
-This area is owned by @1! = Dieses Gebiet gehoert @1!
 This area is owned by @1. = Dieses Gebiet gehoert @1.
 Protection located at: @1 = Stoerschutz befindet sich bei: @1
 Members: @1. = Mitglieder: @1.
 This area is not protected. = Dieses Gebiet ist nicht geschuetzt.
 You can build here. = Du kannst hier bauen.
-Overlaps into above players protected area = Ueberlappt in geschuetzen Bereich eines Spielers
+You cannot build here. = Du kannst hier nicht bauen.
+Overlaps into @1's protected area. = Ueberlappt in geschuetzen Bereich von @1.
 Protection Block = Störschutzblock
 Protection (owned by @1) = Störschutz (gehört @1)
 Protection Logo = Störschutzlogo
