@@ -14,8 +14,8 @@ To Inventory = Envantere
 Protected Chest (@1) = Korumalı sandık (@1)
 
 #init.lua
--- Protector interface -- = 
-Punch node to show protected area or use for area check = Korumalı alanı görmek için kutucuğa vurun yada alanı kontrol etmek için kullanın
+Punch node to show protected area. = Korumalı alanı görmek için kutucuğa vurun.
+Owner: @1 = Sahip: @1
 Members: = Üyeler
 Close = Kapat
 Other members can change configuration = Diğer üyeler yapılandırmayı değiştirebilir

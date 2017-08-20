@@ -14,8 +14,8 @@ To Inventory =
 Protected Chest (@1) = 
 
 #init.lua
--- Protector interface -- = 
-Punch node to show protected area or use for area check = 
+Punch node to show protected area. = 
+Owner: @1 = 
 Members: = 
 Close = 
 Other members can change configuration = 

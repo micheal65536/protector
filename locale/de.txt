@@ -16,8 +16,8 @@ To Inventory = Zum Inventar
 Protected Chest (@1) = Geschützte Truhe (@1)
 
 #init.lua
--- Protector interface -- = -- Störschutz-Interface --
-Punch node to show protected area or use for area check = Schlage Node, um geschützten Bereich anzuzeigen oder\nbenutze für Bereichsprüfung
+Punch node to show protected area. = Schlage Knoten, um geschützten Bereich anzuzeigen.
+Owner: @1 = Eigentümer: @1
 Members: = Mitglieder:
 Close = Schließen
 Other members can change configuration = Andere mitglieder können die konfiguration ändern
