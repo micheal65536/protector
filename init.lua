@@ -95,7 +95,7 @@ end
 
 -- protector interface
 protector.generate_formspec = function(meta, player_name)
-	local show_owner_options = protector.is_owner(meta, player_name)
+	local show_owner_options = protector.is_owner(meta, player_name) or minetest.check_player_privs(player_name, {protection_bypass = true})
 	local show_member_options = meta:get_int("members_can_change") == 1 and protector.is_member(meta, player_name)
 
 	local formspec = "size[8,6]"
@@ -120,6 +120,10 @@ protector.generate_formspec = function(meta, player_name)
 			-- don't allow players to remove themselves
 			if members[n] == player_name then
 				allow_remove = false
+			end
+			-- players with protection_bypass can always remove any player
+			if minetest.check_player_privs(player_name, {protection_bypass = true}) then
+				allow_remove = true
 			end
 
 			if allow_remove == true then
@@ -368,14 +372,14 @@ minetest.register_node("protector:protect", {
 	on_rightclick = function(pos, node, clicker, itemstack)
 		local meta = minetest.get_meta(pos)
 
-		if meta and (protector.is_owner(meta, clicker:get_player_name()) or (meta:get_int("members_can_change") == 1 and protector.is_member(meta, clicker:get_player_name())) or protector.guest_show_members) then
+		if meta and (protector.is_owner(meta, clicker:get_player_name()) or (meta:get_int("members_can_change") == 1 and protector.is_member(meta, clicker:get_player_name())) or protector.guest_show_members or minetest.check_player_privs(clicker:get_player_name(), {protection_bypass = true})) then
 			minetest.show_formspec(clicker:get_player_name(), "protector:node_" .. minetest.pos_to_string(pos), protector.generate_formspec(meta, clicker:get_player_name()))
 		end
 	end,
 
 	on_punch = function(pos, node, puncher)
 		local meta = minetest.get_meta(pos)
-		if protector.is_owner(meta, puncher:get_player_name()) or protector.is_member(meta, puncher:get_player_name()) or protector.guest_show_area then
+		if protector.is_owner(meta, puncher:get_player_name()) or protector.is_member(meta, puncher:get_player_name()) or protector.guest_show_area or minetest.check_player_privs(puncher:get_player_name(), {protection_bypass = true}) then
 			minetest.add_entity(pos, "protector:display")
 		end
 	end,
@@ -479,14 +483,14 @@ minetest.register_node("protector:protect2", {
 	on_rightclick = function(pos, node, clicker, itemstack)
 		local meta = minetest.get_meta(pos)
 
-		if meta and (protector.is_owner(meta, clicker:get_player_name()) or (meta:get_int("members_can_change") == 1 and protector.is_member(meta, clicker:get_player_name())) or protector.guest_show_members) then
+		if meta and (protector.is_owner(meta, clicker:get_player_name()) or (meta:get_int("members_can_change") == 1 and protector.is_member(meta, clicker:get_player_name())) or protector.guest_show_members or minetest.check_player_privs(clicker:get_player_name(), {protection_bypass = true})) then
 			minetest.show_formspec(clicker:get_player_name(), "protector:node_" .. minetest.pos_to_string(pos), protector.generate_formspec(meta, clicker:get_player_name()))
 		end
 	end,
 
 	on_punch = function(pos, node, puncher)
 		local meta = minetest.get_meta(pos)
-		if protector.is_owner(meta, puncher:get_player_name()) or protector.is_member(meta, puncher:get_player_name()) or protector.guest_show_area then
+		if protector.is_owner(meta, puncher:get_player_name()) or protector.is_member(meta, puncher:get_player_name()) or protector.guest_show_area or minetest.check_player_privs(puncher:get_player_name(), {protection_bypass = true}) then
 			minetest.add_entity(pos, "protector:display")
 		end
 	end,
@@ -516,12 +520,12 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local meta = minetest.get_meta(minetest.string_to_pos(string.sub(formname, string.len("protector:node_") + 1)))
 
 		-- prevent non-members from modifying the protector
-		if not protector.is_owner(meta, player:get_player_name()) and not protector.is_member(meta, player:get_player_name()) then
+		if not protector.is_owner(meta, player:get_player_name()) and not protector.is_member(meta, player:get_player_name()) and not minetest.check_player_privs(player:get_player_name(), {protection_bypass = true}) then
 			return
 		end
 
 		-- only the owner is allowed to modify the protector, unless the protector is configured to allow other members to change it
-		if not (meta:get_int("members_can_change") == 1) and not protector.is_owner(meta, player:get_player_name()) then
+		if not (meta:get_int("members_can_change") == 1) and not protector.is_owner(meta, player:get_player_name()) and not minetest.check_player_privs(player:get_player_name(), {protection_bypass = true}) then
 			return
 		end
 
@@ -536,14 +540,14 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		for field, value in pairs(fields) do
 			if string.sub(field, 0, string.len("protector_del_member_")) == "protector_del_member_" then
 				local member = string.sub(field,string.len("protector_del_member_") + 1)
-				if member ~= player:get_player_name() then
+				if member ~= player:get_player_name() or minetest.check_player_privs(player:get_player_name(), {protection_bypass = true}) then
 					protector.del_member(meta, member)
 				end
 			end
 		end
 
 		-- allow other players to change configuration
-		if fields.protector_members_can_change and protector.is_owner(meta, player:get_player_name()) then	-- only the owner is allowed to change this setting
+		if fields.protector_members_can_change and (protector.is_owner(meta, player:get_player_name()) or minetest.check_player_privs(player:get_player_name(), {protection_bypass = true})) then	-- only the owner is allowed to change this setting
 			if fields.protector_members_can_change == "true" then
 				meta:set_int("members_can_change", 1)
 			else
