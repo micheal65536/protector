@@ -6,6 +6,8 @@ protector.flip = minetest.setting_getbool("protector_flip") or false
 protector.hurt = tonumber(minetest.setting_get("protector_hurt")) or 0
 protector.spawn = tonumber(minetest.setting_get("protector_spawn")
 	or minetest.setting_get("protector_pvp_spawn")) or 0
+protector.guest_show_area = minetest.setting_getbool("protector_guest_show_area") or false
+protector.guest_show_members = minetest.setting_getbool("protector_guest_show_members") or false
 
 
 -- get static spawn position
@@ -104,7 +106,7 @@ protector.generate_formspec = function(meta, player_name)
 		.. "label[0,1;" .. S("Members:") .. "]"
 		.. "button_exit[2.5,5.5;3,0.5;protector_close;" .. S("Close") .. "]"
 
-	if show_owner_options or show_member_options or protector.is_member(meta, player_name) then
+	if show_owner_options or show_member_options or protector.is_member(meta, player_name) or protector.guest_show_area then
 		formspec = formspec .. "label[0,0.5;" .. S("Punch node to show protected area.") .. "]"
 	end
 
@@ -366,14 +368,14 @@ minetest.register_node("protector:protect", {
 	on_rightclick = function(pos, node, clicker, itemstack)
 		local meta = minetest.get_meta(pos)
 
-		if meta and (protector.is_owner(meta, clicker:get_player_name()) or (meta:get_int("members_can_change") == 1 and protector.is_member(meta, clicker:get_player_name()))) then
+		if meta and (protector.is_owner(meta, clicker:get_player_name()) or (meta:get_int("members_can_change") == 1 and protector.is_member(meta, clicker:get_player_name())) or protector.guest_show_members) then
 			minetest.show_formspec(clicker:get_player_name(), "protector:node_" .. minetest.pos_to_string(pos), protector.generate_formspec(meta, clicker:get_player_name()))
 		end
 	end,
 
 	on_punch = function(pos, node, puncher)
 		local meta = minetest.get_meta(pos)
-		if protector.is_owner(meta, puncher:get_player_name()) or protector.is_member(meta, puncher:get_player_name()) then
+		if protector.is_owner(meta, puncher:get_player_name()) or protector.is_member(meta, puncher:get_player_name()) or protector.guest_show_area then
 			minetest.add_entity(pos, "protector:display")
 		end
 	end,
@@ -477,14 +479,14 @@ minetest.register_node("protector:protect2", {
 	on_rightclick = function(pos, node, clicker, itemstack)
 		local meta = minetest.get_meta(pos)
 
-		if meta and (protector.is_owner(meta, clicker:get_player_name()) or (meta:get_int("members_can_change") == 1 and protector.is_member(meta, clicker:get_player_name()))) then
+		if meta and (protector.is_owner(meta, clicker:get_player_name()) or (meta:get_int("members_can_change") == 1 and protector.is_member(meta, clicker:get_player_name())) or protector.guest_show_members) then
 			minetest.show_formspec(clicker:get_player_name(), "protector:node_" .. minetest.pos_to_string(pos), protector.generate_formspec(meta, clicker:get_player_name()))
 		end
 	end,
 
 	on_punch = function(pos, node, puncher)
 		local meta = minetest.get_meta(pos)
-		if protector.is_owner(meta, puncher:get_player_name()) or protector.is_member(meta, puncher:get_player_name()) then
+		if protector.is_owner(meta, puncher:get_player_name()) or protector.is_member(meta, puncher:get_player_name()) or protector.guest_show_area then
 			minetest.add_entity(pos, "protector:display")
 		end
 	end,

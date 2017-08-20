@@ -79,3 +79,9 @@ protector_hurt = 2
 
 protector_flip = true
 - When true players who dig inside a protected area will flipped around to stop them using lag to grief into someone else's build
+
+protector_guest_show_area = false
+- When true players who are not the owner or a member of a protector can punch the protector to see the protected area.
+
+protector_guest_show_members = false
+- When true players who are not the owner or a member of a protector can right-click on the protector to see the protector's members.
