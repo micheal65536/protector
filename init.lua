@@ -58,7 +58,7 @@ end
 -- add player name to table as member
 protector.add_member = function(meta, name)
 
-	if protector.is_member(meta, name) then
+	if name == meta:get_string("owner") or protector.is_member(meta, name) then
 		return
 	end
 
