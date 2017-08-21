@@ -37,3 +37,10 @@ Protection Logo = Störschutzlogo
 [Protector] on_punchplayer called with nil objects = on_punchplayer wurde durch "nil objects" aufgerufen
 [Protector] pvp_protect not active, update your version of Minetest = pvp_protect ist nicht aktiv, aktualisiere deine Minetestversion
 [Protector] pvp_protect is disabled = pvp_protect ist ausgeschaltet
+
+#tool.lua
+Protector Placer Tool (stand near protector, face direction and use) = Beschützer Werkzeug (Stand in der Nähe Beschützer, sehen Richtung und benutzen)
+No protector found. = Kein Beschützer gefunden.
+Protector already in place. = Beschützer bereits vorhanden.
+No protectors available to place. = Keine Beschützer für das Platzieren verfügbar.
+Protector placed at: @1 = Beschützer platziert an: @1

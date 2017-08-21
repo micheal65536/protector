@@ -1,114 +1,98 @@
+-- protector placement tool (thanks to Shara for idea and original code)
 
--- protector placement tool (thanks to Shara for code and idea)
+local S = protector.intllib
 
 minetest.register_craftitem("protector:tool", {
-	description = "Protector Placer Tool (stand near protector, face direction and use)",
+	description = S("Protector Placer Tool (stand near protector, face direction and use)"),
 	inventory_image = "protector_display.png^protector_logo.png",
 	stack_max = 1,
 
 	on_use = function(itemstack, user, pointed_thing)
-
-		local name = user:get_player_name()
-
 		-- check for protector near player (2 block radius)
-		local pos = user:getpos()
-		local pp = minetest.find_nodes_in_area(
-			vector.subtract(pos, 2), vector.add(pos, 2),
-			{"protector:protect", "protector:protect2"})
-
-		if #pp == 0 then return end -- none found
-
-		pos = pp[1] -- take position of first protector found
-
-		-- get members on protector
-		local meta = minetest.get_meta(pos)
-		local members = meta:get_string("members") or ""
+		local player_pos = user:getpos()
+		local protectors = minetest.find_nodes_in_area(vector.subtract(player_pos, 2), vector.add(player_pos, 2), {"protector:protect", "protector:protect2"})
+		local pos
+		for _, protector_pos in ipairs(protectors) do
+			local meta = minetest.get_meta(protector_pos)
+			if protector.is_owner(meta, user:get_player_name()) then
+				pos = protector_pos
+				break
+			end
+		end
+		if not pos then
+			minetest.chat_send_player(user:get_player_name(), S("No protector found."))
+			return
+		end
 
 		-- get direction player is facing
-		local dir = minetest.dir_to_facedir( user:get_look_dir() )
-		local vec = {x = 0, y = 0, z = 0}
-		local gap = (protector.radius * 2) + 1
-		local pit =  user:get_look_pitch()
+		local player_direction = minetest.dir_to_facedir(user:get_look_dir())
+		local player_pitch =  user:get_look_pitch()
+		local protector_gap = (protector.radius * 2) + 1
+		local protector_offset = {x = 0, y = 0, z = 0}
 
 		-- set placement coords
-		if pit > 1.2 then
-			vec.y = gap -- up
-		elseif pit < -1.2 then
-			vec.y = -gap -- down
-		elseif dir == 0 then
-			vec.z = gap -- north
-		elseif dir == 1 then
-			vec.x = gap -- east
-		elseif dir == 2 then
-			vec.z = -gap -- south
-		elseif dir == 3 then
-			vec.x = -gap -- west
+		if player_pitch > 1.2 then	-- up
+			protector_offset.y = protector_gap
+		elseif player_pitch < -1.2 then	-- down
+			protector_offset.y = -protector_gap
+		elseif player_direction == 0 then	-- north
+			protector_offset.z = protector_gap
+		elseif player_direction == 1 then	-- east
+			protector_offset.x = protector_gap
+		elseif player_direction == 2 then	-- south
+			protector_offset.z = -protector_gap
+		elseif player_direction == 3 then	-- west
+			protector_offset.x = -protector_gap
 		end
 
 		-- new position
-		pos.x = pos.x + vec.x
-		pos.y = pos.y + vec.y
-		pos.z = pos.z + vec.z
+		local new_pos = {x = pos.x + protector_offset.x, y = pos.y + protector_offset.y, z = pos.z + protector_offset.z}
 
-		-- does placing a protector overlap existing area
-		if protector.check_overlap(pos, user) then
+		-- check if placing a protector overlaps existing area or the new location is protected against this player
+		if protector.check_overlap(new_pos, user) or minetest.is_protected(new_pos, user:get_player_name()) then
 			return
 		end
 
-		-- does a protector already exist ?
-		if #minetest.find_nodes_in_area(
-			vector.subtract(pos, 1), vector.add(pos, 1),
-			{"protector:protect", "protector:protect2"}) > 0 then
-
-			minetest.chat_send_player(name, "Protector already in place!")
-			return
-		end
-
-		-- do we have protectors to use ?
-		local nod
-		local inv = user:get_inventory()
-
-		if not inv:contains_item("main", "protector:protect")
-		and not inv:contains_item("main", "protector:protect2") then
-			minetest.chat_send_player(name, "No protectors available to place!")
+		-- check if a protector already exists
+		local node = minetest.get_node(new_pos)
+		if node.name == "protector:protect" or node.name == "protector:protect2" then
+			minetest.chat_send_player(user:get_player_name(), S("Protector already in place."))
 			return
 		end
 
 		-- take protector (block first then logo)
+		local inv = user:get_inventory()
 		if inv:contains_item("main", "protector:protect") then
-
 			inv:remove_item("main", "protector:protect")
-			nod = "protector:protect"
-
+			protector_node_name = "protector:protect"
 		elseif inv:contains_item("main", "protector:protect2") then
-
 			inv:remove_item("main", "protector:protect2")
-			nod = "protector:protect2"
+			protector_node_name = "protector:protect2"
+		else
+			minetest.chat_send_player(user:get_player_name(), S("No protectors available to place."))
+			return
 		end
 
 		-- place protector
-		minetest.set_node(pos, {name = nod, param2 = 1})
+		minetest.set_node(new_pos, {name = protector_node_name, param2 = 1})
 
-		-- set protector metadata
-		local meta = minetest.get_meta(pos)
+		-- call node callbacks
+		minetest.registered_nodes[protector_node_name].after_place_node(new_pos, user)
 
-		meta:set_string("owner", name)
-		meta:set_string("infotext", "Protection (owned by " .. name .. ")")
-
-		-- copy members across if holding sneak when using tool
+		-- copy configuration if holding sneak when using tool
 		if user:get_player_control().sneak then
-			meta:set_string("members", members)
-		else
-			meta:set_string("members", "")
+			local existing_meta = minetest.get_meta(pos)
+			local new_meta = minetest.get_meta(new_pos)
+			if existing_meta and new_meta then
+				protector.set_member_list(new_meta, protector.get_member_list(existing_meta))
+				new_meta:set_int("members_can_change", existing_meta:get_int("members_can_change"))
+			end
 		end
 
-		minetest.chat_send_player(name,
-				"Protector placed at " .. minetest.pos_to_string(pos))
-
+		minetest.chat_send_player(user:get_player_name(), S("Protector placed at: @1", minetest.pos_to_string(new_pos)))
 	end,
 })
 
--- tool recipe
 minetest.register_craft({
 	output = "protector:tool",
 	recipe = {
@@ -116,17 +100,4 @@ minetest.register_craft({
 		{"default:steel_ingot", "protector:protect", "default:steel_ingot"},
 		{"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"},
 	}
-})
-
--- recipes to switch between protectors
-minetest.register_craft({
-	type = "shapeless",
-	output = "protector:protect",
-	recipe = {"protector:protect2"}
-})
-
-minetest.register_craft({
-	type = "shapeless",
-	output = "protector:protect2",
-	recipe = {"protector:protect"}
 })

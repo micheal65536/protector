@@ -35,3 +35,10 @@ Protection Logo =
 [Protector] on_punchplayer called with nil objects = 
 [Protector] pvp_protect not active, update your version of Minetest = 
 [Protector] pvp_protect is disabled = 
+
+#tool.lua
+Protector Placer Tool (stand near protector, face direction and use) = 
+No protector found. = 
+Protector already in place. = 
+No protectors available to place. = 
+Protector placed at: @1 = 
