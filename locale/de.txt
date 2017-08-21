@@ -44,3 +44,5 @@ No protector found. = Kein Beschützer gefunden.
 Protector already in place. = Beschützer bereits vorhanden.
 No protectors available to place. = Keine Beschützer für das Platzieren verfügbar.
 Protector placed at: @1 = Beschützer platziert an: @1
+Cannot place protector in the air at @1. = Kann nicht Schützer in die Luft bei @1 stellen.
+Cannot place protector underground at @1. = Kann nicht Schützer unter den Boden bei @1 stellen.

@@ -42,3 +42,5 @@ No protector found. =
 Protector already in place. = 
 No protectors available to place. = 
 Protector placed at: @1 = 
+Cannot place protector in the air at @1. = 
+Cannot place protector underground at @1. = 

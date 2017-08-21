@@ -8,6 +8,8 @@ protector.spawn = tonumber(minetest.setting_get("protector_spawn")
 	or minetest.setting_get("protector_pvp_spawn")) or 0
 protector.guest_show_area = minetest.setting_getbool("protector_guest_show_area") or false
 protector.guest_show_members = minetest.setting_getbool("protector_guest_show_members") or false
+protector.tool_prevent_floating = minetest.setting_getbool("protector_tool_prevent_floating") or false
+protector.tool_prevent_underground = minetest.setting_getbool("protector_tool_prevent_underground") or false
 
 
 -- get static spawn position

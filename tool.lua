@@ -54,10 +54,28 @@ minetest.register_craftitem("protector:tool", {
 		end
 
 		-- check if a protector already exists
-		local node = minetest.get_node(new_pos)
-		if node.name == "protector:protect" or node.name == "protector:protect2" then
+		local existing_name = minetest.get_node(new_pos).name
+		if existing_name == "protector:protect" or existing_name == "protector:protect2" then
 			minetest.chat_send_player(user:get_player_name(), S("Protector already in place."))
 			return
+		end
+
+		if protector.tool_prevent_floating and not minetest.check_player_privs(user:get_player_name(), {protection_bypass = true}) then
+			-- check if protector is on the ground
+			local below_name = minetest.get_node({x = new_pos.x, y = new_pos.y - 1, z = new_pos.z}).name
+			if below_name == "ignore" or minetest.registered_nodes[below_name].buildable_to then
+				minetest.chat_send_player(user:get_player_name(), S("Cannot place protector in the air at @1.", minetest.pos_to_string(new_pos)))
+				return
+			end
+		end
+
+		if protector.tool_prevent_underground and not minetest.check_player_privs(user:get_player_name(), {protection_bypass = true}) then
+			-- check if protector location is already occupied
+			local existing_name = minetest.get_node(new_pos).name
+			if existing_name == "ignore" or not minetest.registered_nodes[existing_name].buildable_to then
+				minetest.chat_send_player(user:get_player_name(), S("Cannot place protector underground at @1.", minetest.pos_to_string(new_pos)))
+				return
+			end
 		end
 
 		-- take protector (block first then logo)

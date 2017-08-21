@@ -85,3 +85,9 @@ protector_guest_show_area = false
 
 protector_guest_show_members = false
 - When true players who are not the owner or a member of a protector can right-click on the protector to see the protector's members.
+
+protector_tool_prevent_floating = false
+- When true the protector placer tool cannot place protectors in the air or on top of nodes that other nodes cannot normally be placed on.
+
+protector_tool_prevent_underground = false
+- When true the protector placer tool cannot place protectors where a node already exists, except for nodes that can normally be replaced by another node.
