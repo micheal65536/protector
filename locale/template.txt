@@ -20,6 +20,7 @@ Members: =
 Close = 
 Other members can change configuration = 
 Change Owner = 
+Disable protection = 
 This area is owned by @1. = 
 Protection located at: @1 = 
 Members: @1. = 

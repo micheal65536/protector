@@ -20,6 +20,7 @@ Members: = Üyeler
 Close = Kapat
 Other members can change configuration = Diğer üyeler yapılandırmayı değiştirebilir
 Change Owner = Sahibi Değiştir
+Disable protection = Korumayı devre dışı bırak
 This area is owned by @1. = Burasının sahibi  @1.
 Protection located at: @1 = Korumanın bulunduğu yer  @1
 Members: @1. = Üyeler  @1. 

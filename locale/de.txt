@@ -22,6 +22,7 @@ Members: = Mitglieder:
 Close = Schließen
 Other members can change configuration = Andere Mitglieder können die Konfiguration ändern
 Change Owner = Besitzer wechseln
+Disable protection = Schutz deaktivieren
 This area is owned by @1. = Dieses Gebiet gehoert @1.
 Protection located at: @1 = Stoerschutz befindet sich bei: @1
 Members: @1. = Mitglieder: @1.

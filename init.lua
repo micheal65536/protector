@@ -107,13 +107,13 @@ protector.generate_formspec = function(meta, player_name)
 	local show_owner_options = protector.is_owner(meta, player_name) or minetest.check_player_privs(player_name, {protection_bypass = true})
 	local show_member_options = meta:get_int("members_can_change") == 1 and protector.is_member(meta, player_name)
 
-	local formspec = "size[8,6]"
+	local formspec = "size[8,6.5]"
 		.. default.gui_bg
 		.. default.gui_bg_img
 		.. default.gui_slots
 		.. "label[0,0;" .. S("Owner: @1", meta:get_string("owner")) .. "]"
 		.. "label[0,1;" .. S("Members:") .. "]"
-		.. "button_exit[2.5,5.5;3,0.5;protector_close;" .. S("Close") .. "]"
+		.. "button_exit[2.5,6;3,0.5;protector_close;" .. S("Close") .. "]"
 
 	if show_owner_options or show_member_options or protector.is_member(meta, player_name) or protector.guest_show_area then
 		formspec = formspec .. "label[0,0.5;" .. S("Punch node to show protected area.") .. "]"
@@ -173,9 +173,14 @@ protector.generate_formspec = function(meta, player_name)
 		end
 	end
 
+	if show_owner_options or show_member_options then
+		-- disable protection checkbox
+		formspec = formspec .. "checkbox[0,4.5;protector_disabled;" .. S("Disable protection") .. ";" .. tostring(meta:get_int("disabled") == 1) .. "]"
+	end
+
 	if show_owner_options then
 		-- allow other players to change configuration checkbox
-		formspec = formspec .. "checkbox[0,4.5;protector_members_can_change;" .. S("Other members can change configuration") .. ";" .. tostring(meta:get_int("members_can_change") == 1) .. "]"
+		formspec = formspec .. "checkbox[0,5;protector_members_can_change;" .. S("Other members can change configuration") .. ";" .. tostring(meta:get_int("members_can_change") == 1) .. "]"
 	end
 
 	return formspec
@@ -251,7 +256,7 @@ function minetest.is_protected(pos, playername)
 		{"protector:protect", "protector:protect2"})
 	for _, protector_pos in ipairs(nodes) do
 		local meta = minetest.get_meta(protector_pos)
-		if not protector.is_owner(meta, playername) and not protector.is_member(meta, playername) then
+		if not protector.is_owner(meta, playername) and not protector.is_member(meta, playername) and meta:get_int("disabled") == 0 then
 			minetest.chat_send_player(playername, S("This area is owned by @1.", meta:get_string("owner")))
 			protected = true
 			break
@@ -373,6 +378,7 @@ minetest.register_node("protector:protect", {
 		meta:set_string("infotext", S("Protection (owned by @1)", meta:get_string("owner")))
 		meta:set_string("members", "")
 		meta:set_int("members_can_change", 0)
+		meta:set_int("disabled", 0)
 	end,
 
 	on_use = function(itemstack, user, pointed_thing)
@@ -487,6 +493,7 @@ minetest.register_node("protector:protect2", {
 		meta:set_string("infotext", S("Protection (owned by @1)", meta:get_string("owner")))
 		meta:set_string("members", "")
 		meta:set_int("members_can_change", 0)
+		meta:set_int("disabled", 0)
 	end,
 
 	on_use = function(itemstack, user, pointed_thing)
@@ -605,6 +612,15 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				if member ~= player:get_player_name() or minetest.check_player_privs(player:get_player_name(), {protection_bypass = true}) then
 					protector.del_member(meta, member)
 				end
+			end
+		end
+
+		-- disable protection
+		if fields.protector_disabled then
+			if fields.protector_disabled == "true" then
+				meta:set_int("disabled", 1)
+			else
+				meta:set_int("disabled", 0)
 			end
 		end
 
