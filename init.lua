@@ -6,6 +6,7 @@ protector.flip = minetest.setting_getbool("protector_flip") or false
 protector.hurt = tonumber(minetest.setting_get("protector_hurt")) or 0
 protector.spawn = tonumber(minetest.setting_get("protector_spawn")
 	or minetest.setting_get("protector_pvp_spawn")) or 0
+protector.allow_owner_change = minetest.setting_getbool("protector_allow_owner_change") or false
 protector.guest_show_area = minetest.setting_getbool("protector_guest_show_area") or false
 protector.guest_show_members = minetest.setting_getbool("protector_guest_show_members") or false
 protector.tool_prevent_floating = minetest.setting_getbool("protector_tool_prevent_floating") or false
@@ -112,6 +113,11 @@ protector.generate_formspec = function(meta, player_name)
 		formspec = formspec .. "label[0,0.5;" .. S("Punch node to show protected area.") .. "]"
 	end
 
+	if (protector.allow_owner_change and show_owner_options) or minetest.check_player_privs(player_name, {protection_bypass = true}) then
+		-- owner change button
+		formspec = formspec .. "button[6,0;2,0.5;protector_change_owner;" .. S("Change Owner") .. "]"
+	end
+
 	local members = protector.get_member_list(meta)
 	local npp = 12 -- max users added to protector list
 	local i = 0
@@ -169,6 +175,30 @@ protector.generate_formspec = function(meta, player_name)
 	return formspec
 end
 
+protector.generate_owner_change_formspec = function(meta, player_name)
+	--[[local formspec = "size[4,2]"
+		.. default.gui_bg
+		.. default.gui_bg_img
+		.. default.gui_slots
+		.. "button[1,1.5;2,0.5;protector_change_owner;" .. S("Change Owner") .. "]"]]--
+	--[[local formspec = "size[4,1.5]"
+		.. default.gui_bg
+		.. default.gui_bg_img
+		.. default.gui_slots
+		.. "button[1,1;2,0.5;protector_change_owner;" .. S("Change Owner") .. "]"]]--
+	local formspec = "size[4,1.5]"
+		.. default.gui_bg
+		.. default.gui_bg_img
+		.. default.gui_slots
+		.. "button_exit[1,1;2,0.5;protector_change_owner;" .. S("Change Owner") .. "]"
+
+	if (protector.allow_owner_change and protector.is_owner(meta, player_name)) or minetest.check_player_privs(player_name, {protection_bypass = true}) then
+		formspec = formspec .. "field[0.333,0.333;4,0.5;protector_owner;;" .. meta:get_string("owner") .. "]"
+		--[[formspec = formspec .. "checkbox[0,0.5;protector_add_as_member;" .. S("Add current owner as a member") .. ";true]"]]--
+	end
+
+	return formspec
+end
 
 -- check if pos is inside a protected spawn area
 local function inside_spawn(pos, radius)
@@ -529,9 +559,10 @@ minetest.register_craft({
 
 -- check formspec buttons or when name entered
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	-- protector formspec found
 	if string.sub(formname, 0, string.len("protector:node_")) == "protector:node_" then
-		local meta = minetest.get_meta(minetest.string_to_pos(string.sub(formname, string.len("protector:node_") + 1)))
+		-- protector formspec found
+		local pos = minetest.string_to_pos(string.sub(formname, string.len("protector:node_") + 1))
+		local meta = minetest.get_meta(pos)
 
 		-- prevent non-members from modifying the protector
 		if not protector.is_owner(meta, player:get_player_name()) and not protector.is_member(meta, player:get_player_name()) and not minetest.check_player_privs(player:get_player_name(), {protection_bypass = true}) then
@@ -541,6 +572,11 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		-- only the owner is allowed to modify the protector, unless the protector is configured to allow other members to change it
 		if not (meta:get_int("members_can_change") == 1) and not protector.is_owner(meta, player:get_player_name()) and not minetest.check_player_privs(player:get_player_name(), {protection_bypass = true}) then
 			return
+		end
+
+		-- owner change button
+		if fields.protector_change_owner and ((protector.allow_owner_change and protector.is_owner(meta, player:get_player_name())) or minetest.check_player_privs(player:get_player_name(), {protection_bypass = true})) then
+			minetest.show_formspec(player:get_player_name(), "protector:owner_change_" .. minetest.pos_to_string(pos), protector.generate_owner_change_formspec(meta, player:get_player_name()))
 		end
 
 		-- add member [+]
@@ -570,9 +606,53 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		end
 
 		-- reset formspec until close button pressed
-		if not fields.protector_close and not fields.quit then
+		if not fields.quit and not fields.protector_change_owner then	-- don't show the normal formspec again if the owner change formspec is supposed to be shown
 			minetest.show_formspec(player:get_player_name(), formname, protector.generate_formspec(meta, player:get_player_name()))
 		end
+	elseif string.sub(formname, 0, string.len("protector:owner_change_")) == "protector:owner_change_" then
+		-- protector owner change formspec found
+		local pos = minetest.string_to_pos(string.sub(formname, string.len("protector:owner_change_") + 1))
+		local meta = minetest.get_meta(pos)
+
+		-- only the owner and players with protection_bypass are allowed to change the protector owner
+		if fields.protector_owner and ((protector.allow_owner_change and protector.is_owner(meta, player:get_player_name())) or minetest.check_player_privs(player:get_player_name(), {protection_bypass = true})) then
+			local current_owner = meta:get_string("owner")
+
+			if fields.protector_owner ~= current_owner then
+				-- check for overlap with other protectors
+				local nodes = minetest.find_nodes_in_area(
+					{x = pos.x - protector.radius * 2, y = pos.y - protector.radius * 2, z = pos.z - protector.radius * 2},
+					{x = pos.x + protector.radius * 2, y = pos.y + protector.radius * 2, z = pos.z + protector.radius * 2},
+					{"protector:protect", "protector:protect2"})
+				-- we don't actually care about the owners of the other protectors, because:
+				-- * the other protector's owner is the same as this protector's current owner, which will make this protector invalid once its owner is changed
+				-- * the other protector's owner is the same as this protector's new owner, in which case this protector is currently invalid so this cannot happen
+				-- * the other protector's owner doesn't match either this protector's current owner or its new owner, in which case this protector is currently invalid so this cannot happen
+				-- so whatever the other protector's owner is, the situation is or will become invalid, so no protectors at all can overlap with this one in order for the owner to change
+				if #nodes > 1 then	-- 1, not 0, because this protector itself will always be found by minetest.find_nodes_in_area
+					minetest.chat_send_player(player:get_player_name(), S("Overlaps into another protected area."))
+				else
+					-- remove new owner from member list if present
+					if protector.is_member(meta, fields.protector_owner) then
+						protector.del_member(meta, fields.protector_owner)
+					end
+
+					-- change owner
+					meta:set_string("owner", fields.protector_owner)
+					meta:set_string("infotext", S("Protection (owned by @1)", meta:get_string("owner")))
+
+					--[[if fields.protector_add_as_member == "true" then]]--
+					--[[-- add old owner as a member
+					protector.add_member(meta, current_owner)]]--
+					--[[end]]--
+				end
+			end
+		end
+
+		--[[-- show normal protector formspec when done
+		if fields.protector_change_owner then
+			minetest.show_formspec(player:get_player_name(), "protector:node_" .. minetest.pos_to_string(pos), protector.generate_formspec(meta, player:get_player_name()))
+		end]]--
 	end
 end)
 

@@ -80,6 +80,9 @@ protector_hurt = 2
 protector_flip = true
 - When true players who dig inside a protected area will flipped around to stop them using lag to grief into someone else's build
 
+protector_allow_owner_change = false
+- When true protector owners can change the ownership of a protector to another player (players with the protection_bypass privilege can always change the owner of a protector)
+
 protector_guest_show_area = false
 - When true players who are not the owner or a member of a protector can punch the protector to see the protected area.
 
