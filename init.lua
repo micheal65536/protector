@@ -7,11 +7,17 @@ protector.hurt = tonumber(minetest.setting_get("protector_hurt")) or 0
 protector.spawn = tonumber(minetest.setting_get("protector_spawn")
 	or minetest.setting_get("protector_pvp_spawn")) or 0
 protector.allow_owner_change = minetest.setting_getbool("protector_allow_owner_change") or false
+protector.use_privileges = minetest.setting_getbool("protector_use_privileges") or false
 protector.guest_show_area = minetest.setting_getbool("protector_guest_show_area") or false
 protector.guest_show_members = minetest.setting_getbool("protector_guest_show_members") or false
 protector.tool_prevent_floating = minetest.setting_getbool("protector_tool_prevent_floating") or false
 protector.tool_prevent_underground = minetest.setting_getbool("protector_tool_prevent_underground") or false
 
+-- register privileges
+if protector.use_privileges then
+	minetest.register_privilege("protection_place", "Can place protector blocks")
+	minetest.register_privilege("protection_transfer", "Can transfer ownership of their protector blocks to other players")
+end
 
 -- get static spawn position
 local statspawn = minetest.setting_get_pos("static_spawnpoint") or {x = 0, y = 2, z = 0}
@@ -113,7 +119,7 @@ protector.generate_formspec = function(meta, player_name)
 		formspec = formspec .. "label[0,0.5;" .. S("Punch node to show protected area.") .. "]"
 	end
 
-	if (protector.allow_owner_change and show_owner_options) or minetest.check_player_privs(player_name, {protection_bypass = true}) then
+	if (protector.allow_owner_change and show_owner_options and (not protector.use_privileges or minetest.check_player_privs(player_name, {protection_transfer = true}))) or minetest.check_player_privs(player_name, {protection_bypass = true}) then
 		-- owner change button
 		formspec = formspec .. "button[6,0;2,0.5;protector_change_owner;" .. S("Change Owner") .. "]"
 	end
@@ -225,7 +231,7 @@ local real_is_protected = minetest.is_protected
 function minetest.is_protected(pos, playername)
 	playername = playername or "" -- nil check
 
-	-- protector_bypass privileged users can override protection
+	-- protection_bypass privileged users can override protection
 	if minetest.check_player_privs(playername, {protection_bypass = true}) then
 		return real_is_protected(pos, playername)
 	end
@@ -347,6 +353,9 @@ minetest.register_node("protector:protect", {
 	},
 
 	on_place = function(itemstack, placer, pointed_thing)
+		if protector.use_privileges and not minetest.check_player_privs(placer:get_player_name(), {protection_place = true}) then
+			return itemstack
+		end
 		if pointed_thing.type ~= "node" then
 			return itemstack
 		end
@@ -458,6 +467,9 @@ minetest.register_node("protector:protect2", {
 	selection_box = {type = "wallmounted"},
 
 	on_place = function(itemstack, placer, pointed_thing)
+		if protector.use_privileges and not minetest.check_player_privs(placer:get_player_name(), {protection_place = true}) then
+			return itemstack
+		end
 		if pointed_thing.type ~= "node" then
 			return itemstack
 		end
@@ -615,7 +627,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local meta = minetest.get_meta(pos)
 
 		-- only the owner and players with protection_bypass are allowed to change the protector owner
-		if fields.protector_owner and ((protector.allow_owner_change and protector.is_owner(meta, player:get_player_name())) or minetest.check_player_privs(player:get_player_name(), {protection_bypass = true})) then
+		if fields.protector_owner and ((protector.allow_owner_change and protector.is_owner(meta, player:get_player_name()) and (not protector.use_privileges or minetest.check_player_privs(player:get_player_name(), {protection_transfer = true}))) or minetest.check_player_privs(player:get_player_name(), {protection_bypass = true})) then
 			local current_owner = meta:get_string("owner")
 
 			if fields.protector_owner ~= current_owner then

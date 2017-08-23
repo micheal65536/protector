@@ -83,6 +83,9 @@ protector_flip = true
 protector_allow_owner_change = false
 - When true protector owners can change the ownership of a protector to another player (players with the protection_bypass privilege can always change the owner of a protector)
 
+protector_use_privileges = false
+- When true then the "protection_place" privilege is required to place protector blocks and the "protection_transfer" privilege is required to transfer ownership of protector blocks.
+
 protector_guest_show_area = false
 - When true players who are not the owner or a member of a protector can punch the protector to see the protected area.
 
