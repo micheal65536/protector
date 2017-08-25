@@ -85,6 +85,7 @@ minetest.register_craftitem("protector:tool", {
 
 		-- take protector (block first then logo)
 		local inv = user:get_inventory()
+		local protector_node_name
 		if inv:contains_item("main", "protector:protect") then
 			inv:remove_item("main", "protector:protect")
 			protector_node_name = "protector:protect"
