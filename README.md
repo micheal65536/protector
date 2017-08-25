@@ -74,6 +74,9 @@ protector_night_pvp = false
 protector_spawn = 10
 - Sets an area 10 nodes around static spawnpoint that is protected.
 
+protector_protect_by_default = false
+- When true then unprotected areas will behave as if they are protected (players cannot dig or build there). Players must protect an area before they can dig or build.
+
 protector_hurt = 2
 - When set to above 0, players digging in protected areas will be hurt by 2 health points (or whichever number it's set to)
 

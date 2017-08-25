@@ -6,6 +6,7 @@ protector.flip = minetest.setting_getbool("protector_flip") or false
 protector.hurt = tonumber(minetest.setting_get("protector_hurt")) or 0
 protector.spawn = tonumber(minetest.setting_get("protector_spawn")
 	or minetest.setting_get("protector_pvp_spawn")) or 0
+protector.protect_by_default = minetest.setting_getbool("protector_protect_by_default") or false
 protector.allow_owner_change = minetest.setting_getbool("protector_allow_owner_change") or false
 protector.use_privileges = minetest.setting_getbool("protector_use_privileges") or false
 protector.guest_show_area = minetest.setting_getbool("protector_guest_show_area") or false
@@ -263,6 +264,20 @@ function minetest.is_protected(pos, playername)
 		end
 	end
 
+	-- check for unprotected area
+	if protector.protect_by_default and protected == false and #nodes == 0 then
+		-- allow placing protector blocks in unprotected areas
+		local player = minetest.get_player_by_name(playername)
+		local item_name
+		if player and player:is_player() then
+			item_name = player:get_wielded_item():get_name()
+		end
+		if item_name ~= "protector:protect" and item_name ~= "protector:protect2" and item_name ~= "protector:tool" then
+			minetest.chat_send_player(playername, S("Building in unprotected areas is prohibited."))
+			protected = true
+		end
+	end
+
 	-- is area protected against player?
 	if protected == true then
 		local player = minetest.get_player_by_name(playername)
@@ -412,7 +427,11 @@ minetest.register_node("protector:protect", {
 			end
 		else
 			minetest.chat_send_player(user:get_player_name(), S("This area is not protected."))
-			minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+			if protector.protect_by_default then
+				minetest.chat_send_player(user:get_player_name(), S("You cannot build here."))
+			else
+				minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+			end
 		end
 	end,
 
@@ -527,7 +546,11 @@ minetest.register_node("protector:protect2", {
 			end
 		else
 			minetest.chat_send_player(user:get_player_name(), S("This area is not protected."))
-			minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+			if protector.protect_by_default then
+				minetest.chat_send_player(user:get_player_name(), S("You cannot build here."))
+			else
+				minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+			end
 		end
 	end,
 
