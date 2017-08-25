@@ -8,6 +8,11 @@ minetest.register_craftitem("protector:tool", {
 	stack_max = 1,
 
 	on_use = function(itemstack, user, pointed_thing)
+		-- require permissions if permissions are enabled
+		if protector.use_privileges and not minetest.check_player_privs(user:get_player_name(), {protection_place = true}) then
+			return
+		end
+
 		-- check for protector near player (2 block radius)
 		local player_pos = user:getpos()
 		local protectors = minetest.find_nodes_in_area(vector.subtract(player_pos, 2), vector.add(player_pos, 2), {"protector:protect", "protector:protect2"})
