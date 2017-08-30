@@ -1,5 +1,5 @@
-# Turkish translation by mahmutelmas06
-# last update: 2016/June/5
+# Turkish translation (originally by mahmutelmas06)
+# last update: 2017/08/30
 
 #doors_chest.lua
 Protected Wooden Door = Korumalı ahşap kapı
@@ -7,43 +7,37 @@ Protected Steel Door = Korumalı çelik kapı
 Protected Trapdoor = Korumalı tuzak kapısı
 Protected Steel Trapdoor = Korumalı çelik tuzak kapısı
 Protected Chest = Korumalı sandık
-@1 moves stuff to protected chest at @2 = @1 korumalı sandığa birşeyler koydu @2
-@1 takes stuff from protected chest at @2 = @1 korumalı sandıktan birşeyler aldı @2
+Protected Chest (@1) = Korumalı sandık (@1)
 To Chest = Sandığa
 To Inventory = Envantere
-Protected Chest (@1) = Korumalı sandık (@1)
+@1 moves stuff to protected chest at @2 = @1 korumalı sandığa birşeyler koydu @2
+@1 takes stuff from protected chest at @2 = @1 korumalı sandıktan birşeyler aldı @2
+@1 moves stuff inside protected chest at @2 = 
 
 #init.lua
-Punch node to show protected area. = Korumalı alanı görmek için kutucuğa vurun.
-Owner: @1 = Sahip: @1
-Members: = Üyeler
-Close = Kapat
-Other members can change configuration = Diğer üyeler yapılandırmayı değiştirebilir
-Change Owner = Sahibi Değiştir
-Disable protection = Korumayı devre dışı bırak
+Protection Block = Koruma kutusu
+Protection (owned by @1) = Koruma (@1 sahibidir) 
+Protection Logo = Koruma arması
 This area is owned by @1. = Burasının sahibi  @1.
-Protection located at: @1 = Korumanın bulunduğu yer  @1
-Members: @1. = Üyeler  @1. 
 This area is not protected. = Bu alan korumalı değildir.
 You can build here. = Buraya inşaa edebilirsiniz.
 You cannot build here. = Buraya inşaa edemezsin.
 Overlaps into @1's protected area. = @1'in korunan alanıyla örtüşüyor.
 Overlaps into another protected area. = Başka bir korunan alana örtüşüyor.
-Protection Block = Koruma kutusu
-Protection (owned by @1) = Koruma (@1 sahibidir) 
-Protection Logo = Koruma arması
-[MOD] Protector Redo loaded = [MOD] Protector Redo yüklendi
-
-#pvp.lua
-[Protector] on_punchplayer called with nil objects = [Protector] on_punchplayer boş objelerle çağrıldı
-[Protector] pvp_protect not active, update your version of Minetest = [Protector] pvp_protect aktif değil, Minetest sürümünüzü güncelleyin.
-[Protector] pvp_protect is disabled = [Protector] pvp_protect kapatıldı.
+Protection located at @1. = Korumanın bulunduğu yer @1.
+Close = Kapat
+Owner: @1 = Sahip: @1
+Members: = Üyeler
+Punch node to show protected area. = Korumalı alanı görmek için kutucuğa vurun.
+Change Owner = Sahibi Değiştir
+Other members can change configuration = Diğer üyeler yapılandırmayı değiştirebilir
+Disable protection = Korumayı devre dışı bırak
 
 #tool.lua
 Protector Placer Tool (stand near protector, face direction and use) = 
 No protector found. = 
-Protector already in place. = 
 No protectors available to place. = 
-Protector placed at: @1 = 
+Protector placed at @1. = 
+Protector already in place. = 
 Cannot place protector in the air at @1. = 
 Cannot place protector underground at @1. = 

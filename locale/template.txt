@@ -1,5 +1,5 @@
 # Template for translations of protector mod
-# last update: 2016/June/5
+# last update: 2017/08/30
 
 #doors_chest.lua
 Protected Wooden Door = 
@@ -7,43 +7,37 @@ Protected Steel Door =
 Protected Trapdoor = 
 Protected Steel Trapdoor = 
 Protected Chest = 
-@1 moves stuff to protected chest at @2 = 
-@1 takes stuff from protected chest at @2 = 
+Protected Chest (@1) = 
 To Chest = 
 To Inventory = 
-Protected Chest (@1) = 
+@1 moves stuff to protected chest at @2 = 
+@1 takes stuff from protected chest at @2 = 
+@1 moves stuff inside protected chest at @2 = 
 
 #init.lua
-Punch node to show protected area. = 
-Owner: @1 = 
-Members: = 
-Close = 
-Other members can change configuration = 
-Change Owner = 
-Disable protection = 
+Protection Block = 
+Protection (owned by @1) = 
+Protection Logo = 
 This area is owned by @1. = 
-Protection located at: @1 = 
-Members: @1. = 
 This area is not protected. = 
 You can build here. = 
 You cannot build here. = 
 Overlaps into @1's protected area. = 
 Overlaps into another protected area. = 
-Protection Block = 
-Protection (owned by @1) = 
-Protection Logo = 
-[MOD] Protector Redo loaded = 
-
-#pvp.lua
-[Protector] on_punchplayer called with nil objects = 
-[Protector] pvp_protect not active, update your version of Minetest = 
-[Protector] pvp_protect is disabled = 
+Protection located at @1. = 
+Close = 
+Owner: @1 = 
+Members: = 
+Punch node to show protected area. = 
+Change Owner = 
+Disable protection = 
+Other members can change configuration = 
 
 #tool.lua
 Protector Placer Tool (stand near protector, face direction and use) = 
 No protector found. = 
-Protector already in place. = 
 No protectors available to place. = 
-Protector placed at: @1 = 
+Protector placed at @1. = 
+Protector already in place. = 
 Cannot place protector in the air at @1. = 
 Cannot place protector underground at @1. = 

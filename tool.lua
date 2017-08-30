@@ -113,7 +113,7 @@ minetest.register_craftitem("protector:tool", {
 			end
 		end
 
-		minetest.chat_send_player(user:get_player_name(), S("Protector placed at: @1", minetest.pos_to_string(new_pos)))
+		minetest.chat_send_player(user:get_player_name(), S("Protector placed at @1.", minetest.pos_to_string(new_pos)))
 	end,
 })
 

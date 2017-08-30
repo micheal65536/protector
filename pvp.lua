@@ -18,11 +18,6 @@ if minetest.setting_getbool("enable_pvp") and protector.pvp then
 		minetest.register_on_punchplayer(function(player, hitter,
 				time_from_last_punch, tool_capabilities, dir, damage)
 
-			if not player
-			or not hitter then
-				print(S("[Protector] on_punchplayer called with nil objects"))
-			end
-
 			if not hitter:is_player() then
 				return false
 			end
@@ -60,10 +55,5 @@ if minetest.setting_getbool("enable_pvp") and protector.pvp then
 			return false
 
 		end)
-	else
-		print(S("[Protector] pvp_protect not active, update your version of Minetest"))
-
 	end
-else
-	print(S("[Protector] pvp_protect is disabled"))
 end

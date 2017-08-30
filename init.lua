@@ -117,7 +117,7 @@ protector.generate_formspec = function(meta, player_name)
 		.. "button_exit[2.5,6;3,0.5;protector_close;" .. S("Close") .. "]"
 
 	if show_owner_options or show_member_options or protector.is_member(meta, player_name) or protector.guest_show_area then
-		formspec = formspec .. "label[0,0.5;" .. S("Punch node to show protected area.") .. "]"
+		formspec = formspec .. "label[0,0.5;" .. S("Punch node to show protected area") .. "]"
 	end
 
 	if (protector.allow_owner_change and show_owner_options and (not protector.use_privileges or minetest.check_player_privs(player_name, {protection_transfer = true}))) or minetest.check_player_privs(player_name, {protection_bypass = true}) then
@@ -413,7 +413,7 @@ minetest.register_node("protector:protect", {
 			minetest.chat_send_player(user:get_player_name(), S("This area is owned by @1.", minetest.get_meta(nodes[1]):get_string("owner")))
 			for _, protector_pos in ipairs(nodes) do
 				local meta = minetest.get_meta(protector_pos)
-				minetest.chat_send_player(user:get_player_name(), S("Protection located at: @1", minetest.pos_to_string(protector_pos)))
+				minetest.chat_send_player(user:get_player_name(), S("Protection located at @1.", minetest.pos_to_string(protector_pos)))
 
 				if not protector.is_owner(meta, user:get_player_name()) and not protector.is_member(meta, user:get_player_name()) then
 					can_build = false
@@ -532,7 +532,7 @@ minetest.register_node("protector:protect2", {
 			minetest.chat_send_player(user:get_player_name(), S("This area is owned by @1.", minetest.get_meta(nodes[1]):get_string("owner")))
 			for _, protector_pos in ipairs(nodes) do
 				local meta = minetest.get_meta(protector_pos)
-				minetest.chat_send_player(user:get_player_name(), S("Protection located at: @1", minetest.pos_to_string(protector_pos)))
+				minetest.chat_send_player(user:get_player_name(), S("Protection located at @1.", minetest.pos_to_string(protector_pos)))
 
 				if not protector.is_owner(meta, user:get_player_name()) and not protector.is_member(meta, user:get_player_name()) then
 					can_build = false
@@ -779,6 +779,3 @@ if minetest.get_modpath("mesecons_mvps") then
 	mesecon.register_mvps_stopper("protector:protect2")
 	mesecon.register_mvps_stopper("protector:chest")
 end
-
-
-print (S("[MOD] Protector Redo loaded"))

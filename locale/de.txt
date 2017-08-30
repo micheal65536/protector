@@ -1,7 +1,5 @@
-# German Translation for protector mod
-# Deutsche Übersetzung der protector Mod
-# last update: 2016/June/5
-# Author: Xanthin
+# German translation (originally by Xanthin)
+# last update: 2017/08/30
 
 #doors_chest.lua
 Protected Wooden Door = Geschützte Holztür
@@ -9,43 +7,37 @@ Protected Steel Door = Geschützte Stahltür
 Protected Trapdoor = Geschützte Falltür
 Protected Steel Trapdoor = Geschützte Stahlfalltür
 Protected Chest = Geschützte Truhe
-@1 moves stuff to protected chest at @2 = @1 verlagert Dinge in geschützte Truhe bei @2
-@1 takes stuff from protected chest at @2 = @1 nimmt Dinge aus geschützter Truhe bei @2
+Protected Chest (@1) = Geschützte Truhe (@1)
 To Chest = Zur Truhe
 To Inventory = Zum Inventar
-Protected Chest (@1) = Geschützte Truhe (@1)
+@1 moves stuff to protected chest at @2 = @1 verlagert Dinge in geschützte Truhe bei @2
+@1 takes stuff from protected chest at @2 = @1 nimmt Dinge aus geschützter Truhe bei @2
+@1 moves stuff inside protected chest at @2 = 
 
 #init.lua
-Punch node to show protected area. = Schlage Knoten, um geschützten Bereich anzuzeigen.
-Owner: @1 = Eigentümer: @1
-Members: = Mitglieder:
-Close = Schließen
-Other members can change configuration = Andere Mitglieder können die Konfiguration ändern
-Change Owner = Besitzer wechseln
-Disable protection = Schutz deaktivieren
+Protection Block = Störschutzblock
+Protection (owned by @1) = Störschutz (gehört @1)
+Protection Logo = Störschutzlogo
 This area is owned by @1. = Dieses Gebiet gehoert @1.
-Protection located at: @1 = Stoerschutz befindet sich bei: @1
-Members: @1. = Mitglieder: @1.
 This area is not protected. = Dieses Gebiet ist nicht geschuetzt.
 You can build here. = Du kannst hier bauen.
 You cannot build here. = Du kannst hier nicht bauen.
 Overlaps into @1's protected area. = Ueberlappt in geschuetzen Bereich von @1.
 Overlaps into another protected area. = Ueberlappt in einen anderen geschuetzen Bereich.
-Protection Block = Störschutzblock
-Protection (owned by @1) = Störschutz (gehört @1)
-Protection Logo = Störschutzlogo
-[MOD] Protector Redo loaded = [MOD] Protector Redo geladen
-
-#pvp.lua
-[Protector] on_punchplayer called with nil objects = on_punchplayer wurde durch "nil objects" aufgerufen
-[Protector] pvp_protect not active, update your version of Minetest = pvp_protect ist nicht aktiv, aktualisiere deine Minetestversion
-[Protector] pvp_protect is disabled = pvp_protect ist ausgeschaltet
+Protection located at @1. = Stoerschutz befindet sich bei @1.
+Close = Schließen
+Owner: @1 = Eigentümer: @1
+Members: = Mitglieder:
+Punch node to show protected area. = Schlage Knoten, um geschützten Bereich anzuzeigen.
+Change Owner = Besitzer wechseln
+Disable protection = Schutz deaktivieren
+Other members can change configuration = Andere Mitglieder können die Konfiguration ändern
 
 #tool.lua
 Protector Placer Tool (stand near protector, face direction and use) = Beschützer Werkzeug (Stand in der Nähe Beschützer, sehen Richtung und benutzen)
 No protector found. = Kein Beschützer gefunden.
-Protector already in place. = Beschützer bereits vorhanden.
 No protectors available to place. = Keine Beschützer für das Platzieren verfügbar.
-Protector placed at: @1 = Beschützer platziert an: @1
+Protector placed at @1. = Beschützer platziert an @1.
+Protector already in place. = Beschützer bereits vorhanden.
 Cannot place protector in the air at @1. = Kann nicht Schützer in die Luft bei @1 stellen.
 Cannot place protector underground at @1. = Kann nicht Schützer unter den Boden bei @1 stellen.
