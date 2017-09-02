@@ -1,5 +1,4 @@
--- protector placement tool (thanks to Shara for idea and original code)
-
+-- protector placement tool (original idea and code by Shara)
 local S = protector.intllib
 
 minetest.register_craftitem("protector:tool", {
