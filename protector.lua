@@ -423,11 +423,16 @@ minetest.register_node("protector:protect", {
 				minetest.chat_send_player(user:get_player_name(), S("You cannot build here."))
 			end
 		else
-			minetest.chat_send_player(user:get_player_name(), S("This area is not protected."))
-			if protector.protect_by_default then
+			if protector.inside_spawn(pos, 0) then
+				minetest.chat_send_player(user:get_player_name(), S("Spawn has been protected up to a @1 block radius.", protector.spawn))
 				minetest.chat_send_player(user:get_player_name(), S("You cannot build here."))
 			else
-				minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+				minetest.chat_send_player(user:get_player_name(), S("This area is not protected."))
+				if protector.protect_by_default then
+					minetest.chat_send_player(user:get_player_name(), S("You cannot build here."))
+				else
+					minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+				end
 			end
 		end
 	end,
@@ -530,11 +535,16 @@ minetest.register_node("protector:protect2", {
 				minetest.chat_send_player(user:get_player_name(), S("You cannot build here."))
 			end
 		else
-			minetest.chat_send_player(user:get_player_name(), S("This area is not protected."))
-			if protector.protect_by_default then
+			if protector.inside_spawn(pos, 0) then
+				minetest.chat_send_player(user:get_player_name(), S("Spawn has been protected up to a @1 block radius.", protector.spawn))
 				minetest.chat_send_player(user:get_player_name(), S("You cannot build here."))
 			else
-				minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+				minetest.chat_send_player(user:get_player_name(), S("This area is not protected."))
+				if protector.protect_by_default then
+					minetest.chat_send_player(user:get_player_name(), S("You cannot build here."))
+				else
+					minetest.chat_send_player(user:get_player_name(), S("You can build here."))
+				end
 			end
 		end
 	end,
