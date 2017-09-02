@@ -686,7 +686,8 @@ minetest.register_node("protector:display_node", {
 })
 
 local path = minetest.get_modpath("protector")
-dofile(path .. "/doors_chest.lua")
+dofile(path .. "/doors.lua")
+dofile(path .. "/chest.lua")
 dofile(path .. "/pvp.lua")
 dofile(path .. "/commands.lua")
 dofile(path .. "/tool.lua")
