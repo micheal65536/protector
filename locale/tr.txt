@@ -8,11 +8,8 @@ Protected Trapdoor = Korumalı tuzak kapısı
 Protected Steel Trapdoor = Korumalı çelik tuzak kapısı
 Protected Chest = Korumalı sandık
 Protected Chest (@1) = Korumalı sandık (@1)
-To Chest = Sandığa
-To Inventory = Envantere
-@1 moves stuff to protected chest at @2 = @1 korumalı sandığa birşeyler koydu @2
-@1 takes stuff from protected chest at @2 = @1 korumalı sandıktan birşeyler aldı @2
-@1 moves stuff inside protected chest at @2 = 
+Name = Isim
+Change Name = İsmini değiştir
 
 #init.lua
 Protection Block = Koruma kutusu

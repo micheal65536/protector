@@ -8,11 +8,8 @@ Protected Trapdoor =
 Protected Steel Trapdoor = 
 Protected Chest = 
 Protected Chest (@1) = 
-To Chest = 
-To Inventory = 
-@1 moves stuff to protected chest at @2 = 
-@1 takes stuff from protected chest at @2 = 
-@1 moves stuff inside protected chest at @2 = 
+Name = 
+Change Name = 
 
 #init.lua
 Protection Block = 

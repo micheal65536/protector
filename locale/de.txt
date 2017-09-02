@@ -8,11 +8,8 @@ Protected Trapdoor = Geschützte Falltür
 Protected Steel Trapdoor = Geschützte Stahlfalltür
 Protected Chest = Geschützte Truhe
 Protected Chest (@1) = Geschützte Truhe (@1)
-To Chest = Zur Truhe
-To Inventory = Zum Inventar
-@1 moves stuff to protected chest at @2 = @1 verlagert Dinge in geschützte Truhe bei @2
-@1 takes stuff from protected chest at @2 = @1 nimmt Dinge aus geschützter Truhe bei @2
-@1 moves stuff inside protected chest at @2 = 
+Name = Name
+Change Name = Wechsel Name
 
 #init.lua
 Protection Block = Störschutzblock
