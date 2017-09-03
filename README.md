@@ -62,38 +62,38 @@ show protected areas of your nearby protectors (max of 5)
 
 The following lines can be added to your minetest.conf file to configure specific features of the mod:
 
+protector_use_privileges = false
+- When true then the "protection_place" privilege is required to place protector blocks and the "protection_transfer" privilege is required to transfer ownership of protector blocks.
+
 protector_radius = 5
-- Sets the area around each protection node so that other players cannot dig, place or enter through protected doors or chests.
+- Sets the size of the protected area around each protection node.
 
-protector_pvp = true
-- true or false this setting disabled pvp inside of protected areas for all players apart from those listed on the protector node.
-
-protector_night_pvp = false
-- when true this setting enables pvp at night time only, even inside protected areas, requires protector_pvp to be active to work.
-
-protector_spawn = 10
-- Sets an area 10 nodes around static spawnpoint that is protected.
+protector_spawn = 0
+- Sets an area around the world spawn point that is protected, or 0 (the default) to disable spawn protection.
 
 protector_protect_by_default = false
 - When true then unprotected areas will behave as if they are protected (players cannot dig or build there). Players must protect an area before they can dig or build.
 
-protector_hurt = 2
-- When set to above 0, players digging in protected areas will be hurt by 2 health points (or whichever number it's set to)
+protector_hurt = 0
+- When set to above 0, players violating protected areas will be hurt by the corresponding number of health points.
 
-protector_flip = true
-- When true players who dig inside a protected area will flipped around to stop them using lag to grief into someone else's build
+protector_flip = false
+- When true players who violate a protected area will flipped around to stop them using lag to glitch into someone else's build.
 
 protector_allow_owner_change = false
 - When true protector owners can change the ownership of a protector to another player (players with the protection_bypass privilege can always change the owner of a protector)
-
-protector_use_privileges = false
-- When true then the "protection_place" privilege is required to place protector blocks and the "protection_transfer" privilege is required to transfer ownership of protector blocks.
 
 protector_guest_show_area = false
 - When true players who are not the owner or a member of a protector can punch the protector to see the protected area.
 
 protector_guest_show_members = false
 - When true players who are not the owner or a member of a protector can right-click on the protector to see the protector's members.
+
+protector_pvp = false
+- When enabled PvP will be prohibited inside protected areas for all players apart from those listed on the protector node.
+
+protector_night_pvp = false
+- when enabled alongside protector_pvp, PvP will be allowed inside protected areas during the night.
 
 protector_tool_prevent_floating = false
 - When true the protector placer tool cannot place protectors in the air or on top of nodes that other nodes cannot normally be placed on.
