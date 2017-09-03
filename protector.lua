@@ -78,22 +78,25 @@ protector.check_overlap = function(pos, player)
 	return false
 end
 
--- override minetest.is_protected to enforce protection
-local real_is_protected = minetest.is_protected
-function minetest.is_protected(pos, playername)
+-- check if a particular position is protected by our protection
+-- return value indicates type of protection:
+--   0 = not protected
+--   1 = normal protection (second return value is protection owner)
+--   2 = spawn protection (second return value is spawn protection radius)
+--   3 = default protection of unprotected area
+protector.is_protected = function(pos, playername)
 	playername = playername or ""	-- nil check
 
 	-- protection_bypass privileged users can override protection
 	if minetest.check_player_privs(playername, {protection_bypass = true}) then
-		return real_is_protected(pos, playername)
+		return 0
 	end
 
 	local protected = false
 
 	-- check for spawn area protection
 	if protector.inside_spawn(pos, 0) then
-		minetest.chat_send_player(playername, S("Spawn has been protected up to a @1 block radius.", protector.spawn))
-		protected = true
+		return 2, protector.spawn
 	end
 
 	-- find protectors
@@ -104,9 +107,7 @@ function minetest.is_protected(pos, playername)
 	for _, protector_pos in ipairs(nodes) do
 		local meta = minetest.get_meta(protector_pos)
 		if not protector.is_owner(meta, playername) and not protector.is_member(meta, playername) and meta:get_int("disabled") == 0 then
-			minetest.chat_send_player(playername, S("This area is owned by @1.", meta:get_string("owner")))
-			protected = true
-			break
+			return 1, meta:get_string("owner")
 		end
 	end
 
@@ -115,18 +116,44 @@ function minetest.is_protected(pos, playername)
 		-- allow placing protector blocks in unprotected areas
 		-- FIXME: this is a hack to allow some items through protection without allowing others, and it probably contains vulnerabilities
 		local player = minetest.get_player_by_name(playername)
-		local item_name
+		local item_name = ""
 		if player and player:is_player() then
 			item_name = player:get_wielded_item():get_name()
 		end
 		if item_name ~= "protector:protect" and item_name ~= "protector:protect2" and item_name ~= "protector:tool" then
-			minetest.chat_send_player(playername, S("Building in unprotected areas is prohibited."))
-			protected = true
+			return 3
 		end
 	end
 
-	-- is area protected against player?
-	if protected == true then
+	return 0
+end
+
+-- override minetest.is_protected to enforce protection
+local next_is_protected = minetest.is_protected
+function minetest.is_protected(pos, playername)
+	if protector.is_protected(pos, playername) ~= 0 then
+		return true
+	else
+		-- pass through to next protection function
+		return next_is_protected(pos, playername)
+	end
+end
+
+-- register protection violation callback
+minetest.register_on_protection_violation(function(pos, playername)
+	local protection_type, protection_info = protector.is_protected(pos, playername)
+
+	-- display message
+	if protection_type == 1 then
+		minetest.chat_send_player(playername, S("This area is owned by @1.", protection_info))
+	elseif protection_type == 2 then
+		minetest.chat_send_player(playername, S("Spawn has been protected up to a @1 block radius.", protection_info))
+	elseif protection_type == 3 then
+		minetest.chat_send_player(playername, S("Building in unprotected areas is prohibited."))
+	end
+
+	-- hurt or flip player
+	if protection_type ~= 0 then
 		local player = minetest.get_player_by_name(playername)
 		if player and player:is_player() then
 			if protector.hurt > 0 and player:get_hp() > 0 then
@@ -154,13 +181,8 @@ function minetest.is_protected(pos, playername)
 				end
 			end
 		end
-
-		return true
 	end
-
-	-- pass through to next protection function
-	return real_is_protected(pos, playername)
-end
+end)
 
 -- protector interface
 local function generate_formspec(meta, player_name)
