@@ -97,18 +97,21 @@ local function register_chest(name, d)	-- modified from default/nodes.lua
 	end
 	def.allow_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
 		if minetest.is_protected(pos, player:get_player_name()) then
+			minetest.record_protection_violation(pos, player:get_player_name())
 			return 0
 		end
 		return count
 	end
 	def.allow_metadata_inventory_put = function(pos, listname, index, stack, player)
 		if minetest.is_protected(pos, player:get_player_name()) then
+			minetest.record_protection_violation(pos, player:get_player_name())
 			return 0
 		end
 		return stack:get_count()
 	end
 	def.allow_metadata_inventory_take = function(pos, listname, index, stack, player)
 		if minetest.is_protected(pos, player:get_player_name()) then
+			minetest.record_protection_violation(pos, player:get_player_name())
 			return 0
 		end
 		return stack:get_count()
@@ -124,6 +127,7 @@ local function register_chest(name, d)	-- modified from default/nodes.lua
 	end
 	def.on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 		if minetest.is_protected(pos, clicker:get_player_name()) then
+			minetest.record_protection_violation(pos, clicker:get_player_name())
 			return itemstack
 		end
 

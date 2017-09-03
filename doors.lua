@@ -12,6 +12,7 @@ local function register_door(name, def)
 			if not minetest.is_protected(pos, clicker:get_player_name()) then
 				return real_rightclick_a(pos, node, clicker, itemstack, pointed_thing)
 			else
+				minetest.record_protection_violation(pos, clicker:get_player_name())
 				return itemstack
 			end
 		end,
@@ -19,12 +20,12 @@ local function register_door(name, def)
 	--[[local real_rightclick_b = minetest.registered_nodes[name .. "_b"].on_rightclick
 	minetest.override_item(name .. "_b", {
 		on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-			return real_rightclick_b(pos, node, clicker, itemstack, pointed_thing)
-			--if not minetest.is_protected(pos, clicker:get_player_name()) then
-			--	return real_rightclick(pos, node, clicker, itemstack, pointed_thing)
-			--else
-			--	return itemstack
-			--end
+			if not minetest.is_protected(pos, clicker:get_player_name()) then
+				return real_rightclick(pos, node, clicker, itemstack, pointed_thing)
+			else
+				minetest.record_protection_violation(pos, clicker:get_player_name())
+				return itemstack
+			end
 		end,
 	})]]--
 end
@@ -79,6 +80,7 @@ local function register_trapdoor(name, def)
 			if not minetest.is_protected(pos, clicker:get_player_name()) then
 				return real_rightclick(pos, node, clicker, itemstack, pointed_thing)
 			else
+				minetest.record_protection_violation(pos, clicker:get_player_name())
 				return itemstack
 			end
 		end,
@@ -89,6 +91,7 @@ local function register_trapdoor(name, def)
 			if not minetest.is_protected(pos, clicker:get_player_name()) then
 				return real_rightclick_open(pos, node, clicker, itemstack, pointed_thing)
 			else
+				minetest.record_protection_violation(pos, clicker:get_player_name())
 				return itemstack
 			end
 		end,
